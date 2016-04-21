@@ -2,45 +2,8 @@
 <html>
   <head>
     <title>Random chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-	  *.center { text-align:center; }
-	  *.clickable:hover { cursor:hand;cursor:pointer; }
-      body { font: 13px Helvetica, Arial; }
-	  input { padding: 8px 12px; }
-	  button { padding: 8px 12px; }
-	  button:hover { cursor:hand;cursor:pointer; }
-	  button.disabled:hover { cursor:default; }
-	  
-	  div.darkFill { position:fixed;left:0;top:0;width:100%;height:100%;background:#fff;z-index:10000;display:block; }
-	  #settingsMenu{ position:relative;top:0;left:0;width:60%;height:100%;margin:auto;border:1px solid #eee;background:#fff;padding-top:5%; }
-	  #settingsTable { width:100%;margin:auto;}
-	  #settingsTable td { padding:8px 5px; }
-	  #closeSettings { position:relative;top:0;left:94%;}
-	  
-      #messages { margin:0;padding:0;overflow:hidden; width:auto;height:100%;}
-	  #messages div { padding: 5px 10px; }
-      #messages div.msgParent { width:100%; background: rgba(30, 30, 230, 0.25) !important;border-bottom:1px solid rgba(30, 30, 120, 0.6); }
-	  #messages div.fromMe { background: rgba(30, 230, 30, 0.25) !important;border-bottom:1px solid rgba(30, 120, 30, 0.6);}
-	  #messages div.fromServer{ background: rgba(230, 230, 30, 0.25) !important;border-bottom:1px solid rgba(120, 120, 30, 0.6);}
-	  #messages div div.sender { float:left;width:120px;height:100%; text-align:right;vertical-align:top;padding-left:0px; }
-	  #messages div div.msg { width:auto;height:100%;overflow:hidden; border-left:1px solid rgba(30, 30, 120, 0.6); }
-	  #messages div.fromMe div.msg { border-left:1px solid rgba(30, 120, 30, 0.6); }
-	  #messages div.fromServer div.msg { border-left:1px solid rgba(120, 120, 30, 0.6); }
-	  
-	  #chatStatus { float:right;width:350px;height:100%;padding:28px 10px 10px 10px;border-left:1px solid rgba(198, 130, 20, 0.8);}
-	  #chatStatus li { list-style-type: none;padding:10px 15px;}
-	  
-      div.actionbar { position: fixed; bottom: 0; width: 100%;background:#fff;}
-	  div.actionbar div.content{ padding: 10px; background:rgba(198, 130, 20, 0.6);border-top:1px solid rgba(198, 130, 20, 0.8); }
-	  form, table { display:inline;margin:0;padding:0; }
-      form input { border: 1px solid rgba(198, 130, 20, 0.8); padding: 10px; min-width:80%;margin-right:1%; }
-      form button { width: 9.5%; background: rgba(198, 130, 20, 0.6); border: 1px solid rgba(198, 130, 20, 0.8); padding: 10px; min-width:10%;}
-	  form button.disabled { opacity:0.5; }
-	  #settingsIcon { height:36px;margin-right:10px; float:left;}
-	  #typeInfo { font-style:italic;margin-bottom:12px; }
-    </style>
-	<script src="jquery.js"></script>
+    <link rel="stylesheet" href="resources/styles/main.css" type="text/css" />
+	<script src="resources/scripts/jquery.js"></script>
   </head>
   <body onLoad="setupSize();">
     <div id="settingsMenuWrapper" class="darkFill">
@@ -78,7 +41,7 @@
 	<div id="actionbar" class="actionbar">
 		<div class="content">
 			<div id="typeInfo"> </div>
-			<img id="settingsIcon" class="clickable" src="./imgs/settings.png">
+			<img id="settingsIcon" class="clickable" src="resources/imgs/settings.png">
 			<form action="" style="inline-block">
 				<input id="m" autocomplete="off" />
 				<button id="sendButton" class="disabled" disabled>Send</button>
