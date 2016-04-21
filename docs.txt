@@ -1,0 +1,17 @@
+Documentation
+--------------
+Server Module:
+	# Main methods
+	startServer(port)
+	isStarted()
+	
+	# Listener methods
+	registerOnServerStartAction(callback)
+	registerOnSocketMessageAction(actionName, callback)
+	
+	# Send methods
+	sendMessageToMyself(socket, messageName, data)
+	sendMessageToEveryoneElse(socket, messageName, data)
+	sendMessageToAll(messageName, data)
+	
+Message Module:

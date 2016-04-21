@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Random chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+	  *.center { text-align:center; }
+	  *.clickable:hover { cursor:hand;cursor:pointer; }
+      body { font: 13px Helvetica, Arial; }
+	  input { padding: 8px 12px; }
+	  button { padding: 8px 12px; }
+	  button:hover { cursor:hand;cursor:pointer; }
+	  button.disabled:hover { cursor:default; }
+	  
+	  div.darkFill { position:fixed;left:0;top:0;width:100%;height:100%;background:#fff;z-index:10000;display:block; }
+	  #settingsMenu{ position:relative;top:0;left:0;width:60%;height:100%;margin:auto;border:1px solid #eee;background:#fff;padding-top:5%; }
+	  #settingsTable { width:100%;margin:auto;}
+	  #settingsTable td { padding:8px 5px; }
+	  #closeSettings { position:relative;top:0;left:94%;}
+	  
+      #messages { margin:0;padding:0;overflow:hidden; width:auto;height:100%;}
+	  #messages div { padding: 5px 10px; }
+      #messages div.msgParent { width:100%; background: rgba(30, 30, 230, 0.25) !important;border-bottom:1px solid rgba(30, 30, 120, 0.6); }
+	  #messages div.fromMe { background: rgba(30, 230, 30, 0.25) !important;border-bottom:1px solid rgba(30, 120, 30, 0.6);}
+	  #messages div.fromServer{ background: rgba(230, 230, 30, 0.25) !important;border-bottom:1px solid rgba(120, 120, 30, 0.6);}
+	  #messages div div.sender { float:left;width:120px;height:100%; text-align:right;vertical-align:top;padding-left:0px; }
+	  #messages div div.msg { width:auto;height:100%;overflow:hidden; border-left:1px solid rgba(30, 30, 120, 0.6); }
+	  #messages div.fromMe div.msg { border-left:1px solid rgba(30, 120, 30, 0.6); }
+	  #messages div.fromServer div.msg { border-left:1px solid rgba(120, 120, 30, 0.6); }
+	  
+	  #chatStatus { float:right;width:350px;height:100%;padding:28px 10px 10px 10px;border-left:1px solid rgba(198, 130, 20, 0.8);}
+	  #chatStatus li { list-style-type: none;padding:10px 15px;}
+	  
+      div.actionbar { position: fixed; bottom: 0; width: 100%;background:#fff;}
+	  div.actionbar div.content{ padding: 10px; background:rgba(198, 130, 20, 0.6);border-top:1px solid rgba(198, 130, 20, 0.8); }
+	  form, table { display:inline;margin:0;padding:0; }
+      form input { border: 1px solid rgba(198, 130, 20, 0.8); padding: 10px; min-width:80%;margin-right:1%; }
+      form button { width: 9.5%; background: rgba(198, 130, 20, 0.6); border: 1px solid rgba(198, 130, 20, 0.8); padding: 10px; min-width:10%;}
+	  form button.disabled { opacity:0.5; }
+	  #settingsIcon { height:36px;margin-right:10px; float:left;}
+	  #typeInfo { font-style:italic;margin-bottom:12px; }
+    </style>
+	<script src="jquery.js"></script>
+  </head>
+  <body onLoad="setupSize();">
+    <div id="settingsMenuWrapper" class="darkFill">
+		<div style="width:100%;height:100%;background:rgba(198, 130, 20, 0.6);">
+			<div id="settingsMenu">
+				<span id="closeSettings" class="clickable">
+					Close
+				</span>
+				<h1 class="center">Settings</h1>
+				<div style="text-align:center;margin-top:5px;">
+					<table id="settingsTable">
+						<tr>
+							<td>Nickname:</td>
+							<td><input id="nickInput" placeholder="e.g. Superman"></td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<button id="saveSettings">Save settings</button>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div id="pageContent">
+		<div id="chatStatus">
+			<h2 class="center">RandomChat</h2>
+			<ul id="usersList"></ul>
+		</div>
+		<div id="messages"></div>
+	</div>
+	<div id="actionbar" class="actionbar">
+		<div class="content">
+			<div id="typeInfo"> </div>
+			<img id="settingsIcon" class="clickable" src="./imgs/settings.png">
+			<form action="" style="inline-block">
+				<input id="m" autocomplete="off" />
+				<button id="sendButton" class="disabled" disabled>Send</button>
+			</form>
+		</div>
+	</div>
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var typing = false;
+		var nickLenLimit = 17;
+		var nick = "";
+		var socket = io();
+		
+		//Internal events
+		$('form').submit(function(){
+			msg = $('#m').val();
+			if(msg.length>0){
+				//Send msg
+				socket.emit('chatmsg', msg);
+				addFormattedMessage("Me", msg, 0);
+				$('#m').val('');
+				//Stop typing
+				typing = false;
+				socket.emit('istyping', typing);
+				$('#sendButton').addClass('disabled');
+			}
+			return false;
+		});
+		$('#saveSettings').on('click', function(){
+			newNick = $('#nickInput').val();
+			if(newNick.length > nickLenLimit){
+				newNick = newNick.substring(0, nickLenLimit);
+			}
+			socket.emit('setnick', newNick);
+			nick = newNick;
+			$('#settingsMenuWrapper').hide();
+		});
+		$('#settingsIcon').on('click', function(){ $('#settingsMenuWrapper').show(); });
+		$('#closeSettings').on('click', function(){ $('#settingsMenuWrapper').hide(); });
+		$('#m').on('keyup', evaluateTyping);
+		$('#m').on('keypress', evaluateTyping);
+		$(window).resize(function () { setupSize(); });
+		
+		//Server events
+		socket.on('connect', function(socket){$('#messages').empty();$('#usersList').empty();});
+		socket.on('disconnect', function(){ addFormattedMessage('[INFO]', 'Connection with the server was lost, please reload page.', 1); });
+		socket.on('chatmessage', function(msg){ addMessage(msg); });
+		socket.on('servermessage', function(msg){ addMessage(msg, 'fromServer'); });
+		socket.on('syncMessages', function(messages){ messages.forEach(function(msg){addMessage(msg);}); });
+		socket.on('connectedUser', function(user){ $('#usersList').append($('<li>').text(user).prop('id', "user_"+getValidIdFromString(user))); });
+		socket.on('disconnectedUser', function(user){ $('#user_'+getValidIdFromString(user)).remove(); });
+		socket.on('renameUser', function(oldName, user){
+			oldName = getValidIdFromString(oldName);
+			if($('#user_'+oldName).length) $('#user_'+oldName).text(user).prop('id', "user_"+getValidIdFromString(user));
+			else $('#usersList').append($('<li>').text(user).prop('id', "user_"+getValidIdFromString(user)));
+			
+			$('.sender').each(function(index, item){
+				if($(item).text() == nick){
+					$(item).text('Me');
+					$(item).parent().addClass('fromMe');
+				}
+			});
+		});
+		socket.on('actionDenied', function(){ addFormattedMessage('[INFO]', 'Invalid request, nothing has been changed', 1); });
+		socket.on('istyping', function(names){
+			var typers = "";
+			for(i = 0; i<names.length; i++){
+				if(names[i] != nick){
+					typers += names[i];
+					if(i<names.length-2)typers += ", ";
+					else if(i == names.length-2)typers += " and ";
+				}
+			}
+			setIsTyping(typers);
+		});
+		
+		function getValidIdFromString(id){
+			return id.replace(/\./g, '\\.').replace(/ /g, '_');
+		}
+		
+		function addFormattedMessage(nick, message, mode){
+			msg = {user:nick, message:message, time:new Date()};
+			addMessage(msg, ['fromMe', 'fromServer'][mode]);
+		}
+		
+		function addMessage(msg, className){
+			var row = $('<div>').addClass('msgParent').append($('<div>').text(msg.user.length>nickLenLimit?msg.user.substring(0, nickLenLimit):msg.user).addClass('sender')).append($('<div>').text(msg.message).addClass('msg'));
+			if(className){
+				row.addClass(className);
+			}
+			$("#messages").append(row);
+			$("#messages").animate({ scrollTop: $('#messages').prop('scrollHeight') }, "slow");
+		}
+		
+		function evaluateTyping(){
+			len = $('#m').val().length;
+			if((!typing && len == 1) || (typing && len == 0)){
+				typing = len>0;
+				socket.emit('istyping', typing);
+				if(typing){
+					$('#sendButton').removeAttr('disabled');
+					$('#sendButton').removeClass('disabled');
+				}else{
+					$('#sendButton').attr('disabled', 'true');
+					$('#sendButton').addClass('disabled');
+				}
+			}
+		}
+		
+		function setIsTyping(name){
+			var text = name+" is typing";
+			if(!name || name == ""){
+				noWritingTexts = ["Total writing silence.", "The keyboards are getting dusty", "No incoming message", "You'll probably have to wait all night", "Soon someone will write perhaps?"];
+				text = "Status: "+noWritingTexts[parseInt(Math.floor(Math.random()*noWritingTexts.length))];
+			}
+			
+			$('#typeInfo').html(text);
+		}
+		
+		function setupSize(){
+			setIsTyping("", true);
+			var size = $(document).height() - $('#actionbar').height();
+			$('#pageContent').css('height', size+'px');
+		}
+	</script>
+  </body>
+</html>

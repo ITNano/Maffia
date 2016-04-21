@@ -1,0 +1,2 @@
+# ignore npm generated folder
+node_modules/*
