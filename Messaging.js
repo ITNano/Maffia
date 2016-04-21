@@ -10,7 +10,7 @@ exports.setupMessaging = function(server){
 		setTyping(server, this, false);
 	});
 	server.registerOnSocketMessageAction('chatmsg', function(msg){
-		server.sendMessageToEveryoneElse(this, 'chatmessage', registerMessage(this, msg));
+		server.sendMessageToEveryoneElse(this, 'chatmessage', registerMessage(server, this, msg));
 	});
 	server.registerOnSocketMessageAction('istyping', function(isTyping){
 		setTyping(server, this, isTyping);
