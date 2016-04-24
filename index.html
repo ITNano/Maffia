@@ -36,7 +36,9 @@
 			<h2 class="center">RandomChat</h2>
 			<ul id="usersList"></ul>
 		</div>
-		<div id="messages"></div>
+		<div id="messagesWrapper">
+			<div id="messages"></div>
+		</div>
 	</div>
 	<div id="actionbar" class="actionbar">
 		<div class="content">
@@ -134,7 +136,7 @@
 				row.addClass(className);
 			}
 			$("#messages").append(row);
-			$("#messages").animate({ scrollTop: $('#messages').prop('scrollHeight') }, "slow");
+			$("#messages").stop(true).animate({ scrollTop: $('#messages').prop('scrollHeight') }, "slow");
 		}
 		
 		function evaluateTyping(){
@@ -163,9 +165,23 @@
 		}
 		
 		function setupSize(){
+			//Save scroll
+			var currentScrollAtBottom = $('#messages').scrollTop()+$('#messages').height();
+			
+			//Reset width properties
+			$('#messages').css('width', 'auto');
+			$('#messagesWrapper').css('width', 'auto');
+			
+			//Setup height
 			setIsTyping("", true);
-			var size = $(document).height() - $('#actionbar').height();
+			var size = $(window).height() - $('#actionbar').height();
 			$('#pageContent').css('height', size+'px');
+			
+			//Calculate and set stuff concerning width and scroll
+			var messagesWidth = $('#messages').width();
+			$('#messages').css('width', (messagesWidth+20)+'px');
+			$('#messagesWrapper').css('width', messagesWidth+'px');
+			$("#messages").stop(true).scrollTop(currentScrollAtBottom-$('#messages').height());
 		}
 	</script>
   </body>
