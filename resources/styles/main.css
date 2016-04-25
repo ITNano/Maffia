@@ -22,21 +22,24 @@ button:hover{
 button.disabled:hover{
 	cursor:default;
 }
+span.clear { clear: left; display: block; }
 
-div.darkFill { position:fixed;left:0;top:0;width:100%;height:100%;background:#fff;z-index:10000;display:block; }
+div.darkFill { position:fixed;left:0;top:0;width:100%;height:100%;background:#fff;z-index:10000;display:none; }
 #settingsMenu{ position:relative;top:0;left:0;width:60%;height:100%;margin:auto;border:1px solid #eee;background:#fff;padding-top:5%; }
 #settingsTable { width:100%;margin:auto;}
 #settingsTable td { padding:8px 5px; }
 #closeSettings { position:relative;top:0;left:94%;}
 
-#messagesWrapper { margin:0;padding:0;overflow:hidden; width:auto;height:100%; }
+#messagesWrapper { margin:0;padding:0;overflow:hidden; width:auto;height:auto; }
 #messages { margin:0;padding:0;overflow:hidden;overflow-y:auto; width:auto;height:100%;}
-#messages div { padding: 5px 10px; }
-#messages div.msgParent { width:100%; background: rgba(30, 30, 230, 0.25) !important;border-bottom:1px solid rgba(30, 30, 120, 0.6); }
+#messages div.msgParent { padding: 5px 10px; width:100%; background: rgba(30, 30, 230, 0.25) !important;border-bottom:1px solid rgba(30, 30, 120, 0.6); }
 #messages div.fromMe { background: rgba(30, 230, 30, 0.25) !important;border-bottom:1px solid rgba(30, 120, 30, 0.6);}
 #messages div.fromServer{ background: rgba(230, 230, 30, 0.25) !important;border-bottom:1px solid rgba(120, 120, 30, 0.6);}
-#messages div div.sender { float:left;width:120px;height:100%; text-align:right;vertical-align:top;padding-left:0px; }
-#messages div div.msg { width:auto;height:100%;overflow:hidden; border-left:1px solid rgba(30, 30, 120, 0.6); }
+#messages div div.messageInfo { float:left;width:120px;text-align:right;vertical-align:top;padding: 2px 10px; border-right:1px solid rgba(30, 30, 120, 0.6);}
+#messages div.fromMe div.messageInfo { border-right:1px solid rgba(30, 120, 30, 0.6); }
+#messages div.fromServer div.messageInfo { border-right:1px solid rgba(120, 120, 30, 0.6); }
+#messages div div.messageTime { font-size:10px;color:#555;margin-top:4px;}
+#messages div div.msg { padding: 10px 20px 5px 10px;width:auto;overflow:hidden; border-left:1px solid rgba(30, 30, 120, 0.6); }
 #messages div.fromMe div.msg { border-left:1px solid rgba(30, 120, 30, 0.6); }
 #messages div.fromServer div.msg { border-left:1px solid rgba(120, 120, 30, 0.6); }
 

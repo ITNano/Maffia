@@ -26,13 +26,14 @@ exports.startServer = function(port){
 	io.on('connection', function(socket){
 		console.log("Got connection");
 		socket.nickname = getRandomName();
+		socket.emit('renameUser', '', socket.nickname);
 		
 		//Notify
 		socket.broadcast.emit('connectedUser', socket.nickname);
-		users.push(socket);
 		users.forEach(function(user){
 			socket.emit('connectedUser', user.nickname);
 		});
+		users.push(socket);
 		
 		socket.on('disconnect', function(){
 			console.log("Disconnecting user")

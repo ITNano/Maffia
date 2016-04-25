@@ -29,7 +29,7 @@ exports.sendMessageToSomeUsers = function(server, users, displayName, messageCon
 
 
 function registerMessage(user, msg, status){
-	msg = {user:user.nickname, message:msg, status:status, time:new Date()};
+	msg = {user:user.nickname, message:msg, status:status, time:new Date().getTime()};
 	messages.push(msg);
 	return msg;
 }

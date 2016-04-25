@@ -79,7 +79,6 @@
 				newNick = newNick.substring(0, nickLenLimit);
 			}
 			socket.emit('setnick', newNick);
-			nick = newNick;
 			$('#settingsMenuWrapper').hide();
 		});
 		$('#settingsIcon').on('click', function(){ $('#settingsMenuWrapper').show(); });
@@ -97,6 +96,11 @@
 		socket.on('connectedUser', function(user){ $('#usersList').append($('<li>').text(user).prop('id', "user_"+getValidIdFromString(user))); });
 		socket.on('disconnectedUser', function(user){ $('#user_'+getValidIdFromString(user)).remove(); });
 		socket.on('renameUser', function(oldName, user){
+			//Rename yourself
+			if(oldName == nick){
+				nick = user;
+			}
+			
 			oldName = getValidIdFromString(oldName);
 			if($('#user_'+oldName).length) $('#user_'+oldName).text(user).prop('id', "user_"+getValidIdFromString(user));
 			else $('#usersList').append($('<li>').text(user).prop('id', "user_"+getValidIdFromString(user)));
@@ -104,7 +108,7 @@
 			$('.sender').each(function(index, item){
 				if($(item).text() == nick){
 					$(item).text('Me');
-					$(item).parent().addClass('fromMe');
+					$(item).parent().parent().addClass('fromMe');
 				}
 			});
 		});
@@ -131,11 +135,17 @@
 		}
 		
 		function addMessage(msg, className){
-			var row = $('<div>').addClass('msgParent').append($('<div>').text(msg.user.length>nickLenLimit?msg.user.substring(0, nickLenLimit):msg.user).addClass('sender')).append($('<div>').text(msg.message).addClass('msg'));
+			var infoDiv = $('<div>').addClass('messageInfo');
+			infoDiv.append($('<div>').text(msg.user.substring(0, Math.min(nickLenLimit, msg.user.length))).addClass('sender'));
+			infoDiv.append($('<div>').text(getFormattedTime(msg.time)).addClass('messageTime'));
+			var messageDiv = $('<div>').text(msg.message).addClass('msg');
+			var row = $('<div>').addClass('msgParent').append(infoDiv).append(messageDiv).append($('<span>').addClass('clear'));
 			if(className){
 				row.addClass(className);
 			}
 			$("#messages").append(row);
+			var shortestElement = ($(infoDiv).height() < $(messageDiv).height()?infoDiv:messageDiv);
+			$(shortestElement).css('border-width', '0');
 			$("#messages").stop(true).animate({ scrollTop: $('#messages').prop('scrollHeight') }, "slow");
 		}
 		
@@ -162,6 +172,17 @@
 			}
 			
 			$('#typeInfo').html(text);
+		}
+		
+		function getFormattedTime(time){
+			const toTwoNums = function(num){return num<10?"0"+num:num;}
+			if(time === undefined){
+				return "Invalid date.";
+			}else{
+				date = new Date(time);
+				return toTwoNums(date.getFullYear())+"-"+toTwoNums(date.getMonth())+"-"+toTwoNums(date.getDate())+" "+
+					   toTwoNums(date.getHours())+":"+toTwoNums(date.getMinutes());
+			}
 		}
 		
 		function setupSize(){
